@@ -13,3 +13,8 @@ provider "aws" {
       tags = local.confluent_tags
     }
 }
+
+provider "confluent" {
+  cloud_api_key    = local.confluent_creds.api_key
+  cloud_api_secret = local.confluent_creds.api_secret
+}

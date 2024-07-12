@@ -16,4 +16,5 @@ terraform/*/files
 terraform/*/*.tfstate
 terraform/*/.terraform
 terraform/*/.terraform.lock.hcl
+terraform/*/aws-remote-tfstate-s3.tf
 terraform/java/terraform.tfstate.backup

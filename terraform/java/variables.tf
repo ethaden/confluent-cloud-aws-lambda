@@ -12,13 +12,6 @@ variable "aws_region" {
     description = "The AWS region to be used"
 }
 
-# Recommendation: Specify this in environment variable TF_VAR_aws_ssh_key_id
-variable "aws_ssh_key_id" {
-    type = string
-    sensitive = true
-    description = "The ID of the SSH key pair as specified in AWS, used for EC2 instances"
-}
-
 variable "purpose" {
     type = string
     default = "Testing"

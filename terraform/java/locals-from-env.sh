@@ -1,28 +1,34 @@
-#!/bin/sh
+#!/bin/bash
 # This file reads data from
 
-if [ -z ${CONFLUENT_CLOUD_API_KEY} -o -z ${CONFLUENT_CLOUD_API_SECRET}]; then
+if [ -z "${TF_USER}" ]; then
+  TF_USER="${USER}"
+fi
+
+if [ -z "${CONFLUENT_CLOUD_API_KEY}" -o -z "${CONFLUENT_CLOUD_API_SECRET}" ]; then
   CONFLUENT_API_KEY_FILE="api-key.txt"
   if [ -e ${CONFLUENT_API_KEY_FILE} ]; then
     export CONFLUENT_CLOUD_API_KEY=$(grep "API key:$" -A 1 ${CONFLUENT_API_KEY_FILE} | sed -n "2p")
     export CONFLUENT_CLOUD_API_SECRET=$(grep "API secret:$" -A 1 ${CONFLUENT_API_KEY_FILE} | sed -n "2p")
   # Comment the next three lines if this project does not use Confluent Cloud
-  else
-    echo "Please set environment variables CONFLUENT_CLOUD_API_KEY and CONFLUENT_CLOUD_API_SECRET or provide an API file ${CONFLUENT_API_KEY_FILE} as exported during creation by the confluent website"
-    exit 1
+#  else
+#    echo "Please set environment variables CONFLUENT_CLOUD_API_KEY and CONFLUENT_CLOUD_API_SECRET or provide an API file ${CONFLUENT_API_KEY_FILE} as exported during creation by the confluent website"
+#    exit 1
   fi
 fi
 
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    REALNAME="$(getent passwd ${USER} | cut -d: -f5)"
+if [ -n "${TF_REALNAME}" ]; then
+    REALNAME="${TF_REALNAME}"
+elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    REALNAME="$(getent passwd ${TF_USER} | cut -d: -f5)"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     # Mac OSX
-    REALNAME="$(dscl . -read /Users/${USER} RealName | cut -d: -f2 | sed -e 's/^[ \t]*//' | grep -v "^$")"
+    REALNAME="$(dscl . -read /Users/${TF_USER} RealName | cut -d: -f2 | sed -e 's/^[ \t]*//' | grep -v "^$")"
 fi
 
 # If possible find the URL of the Github repo where this code lives
 PROVENANCE=""
-if which -s git; then
+if command -v git &> /dev/null; then
   if REMOTE=$(git config --get remote.origin.url) 2>/dev/null; then
     PROVENANCE=${REMOTE}
   fi
@@ -44,9 +50,9 @@ if [ -z "${CONFLUENT_CLOUD_API_KEY}" -o -z "${CONFLUENT_CLOUD_API_SECRET}" ]; th
   # Do not use Confluent Cloud
   cat <<EOF
   {
-    "user": "${USER}",
+    "user": "${TF_USER}",
     "owner_fullname": "${REALNAME}",
-    "owner_email": "${USER}@confluent.io",
+    "owner_email": "${TF_USER}@confluent.io",
     "provenance": "${PROVENANCE}",
     "current_datetime": "${CURRENT_DATETIME}",
     "public_ssh_key": "${PUBLIC_SSH_KEY}"
@@ -55,9 +61,9 @@ EOF
 else
   cat <<EOF
   {
-    "user": "${USER}",
+    "user": "${TF_USER}",
     "owner_fullname": "${REALNAME}",
-    "owner_email": "${USER}@confluent.io",
+    "owner_email": "${TF_USER}@confluent.io",
     "provenance": "${PROVENANCE}",
     "current_datetime": "${CURRENT_DATETIME}",
     "api_key": "${CONFLUENT_CLOUD_API_KEY}",

@@ -89,6 +89,6 @@ resource "confluent_kafka_cluster" "basic" {
   }
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 }

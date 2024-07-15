@@ -17,6 +17,10 @@ resource "aws_s3_bucket_ownership_controls" "aws_s3_example_kafka_lambda_bucket_
   }
 }
 
+resource "aws_cloudwatch_log_group" "aws_s3_example_kafka_lambda_bucket_loggroup" {
+  name              = "example_kafka_lambda"
+  retention_in_days = 90
+}
 
 #data "archive_file" "example_kafka_lambda_archive" {
 #  type = "zip"
@@ -52,9 +56,40 @@ data "aws_iam_policy_document" "assume_role" {
   }
 }
 
-resource "aws_iam_role" "iam_for_lambda" {
-  name               = "iam_for_lambda"
+data "aws_iam_policy_document" "write_to_cloudwatch_policy_document" {
+  // Allow lambda to write logs
+  statement {
+      effect = "Allow"
+      actions = [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "logs:DescribeLogStreams"
+    ]
+    resources = [
+        "arn:aws:logs:${var.aws_region}:*:example_kafka_lambda_iam"
+    ]
+  }
+}
+
+resource "aws_iam_policy" "write_to_cloudwatch_policy" {
+    name = "example_kafka_lambda_write_to_cloudwatch_policy"
+
+    policy = data.aws_iam_policy_document.write_to_cloudwatch_policy_document.json
+}
+
+
+resource "aws_iam_role" "example_kafka_lambda_iam" {
+  name               = "example_kafka_lambda_iam"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
+  managed_policy_arns = [
+    aws_iam_policy.write_to_cloudwatch_policy.arn
+  ]
+}
+
+resource "aws_cloudwatch_log_group" "example_kafka_lambda_log_group" {
+  name              = "/aws/lambda/example_kafka_lambda"
+  retention_in_days = 2
 }
 
 resource "aws_lambda_function" "example_kafka_lambda" {
@@ -62,7 +97,7 @@ resource "aws_lambda_function" "example_kafka_lambda" {
   # path.module in the filename.
   filename      = "${path.module}/../../java/app/build/distributions/app.zip"
   function_name = "example_kafka_lambda"
-  role          = aws_iam_role.iam_for_lambda.arn
+  role          = aws_iam_role.example_kafka_lambda_iam.arn
   handler       = "io.confluent.example.aws.lambda.App"
 
   source_code_hash = local_file.example_kafka_lambda_archive.content_base64sha256

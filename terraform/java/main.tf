@@ -197,7 +197,7 @@ resource "confluent_api_key" "example_kafka_lambda_api_key_producer" {
 #     prevent_destroy = false
 #   }
 # }
-resource "confluent_kafka_acl" "example_kafka_lambda_role_binding_producer" {
+resource "confluent_kafka_acl" "example_kafka_lambda_acl_producer" {
  kafka_cluster {
     id = confluent_kafka_cluster.example_kafka_lambda_cluster.id
   }
@@ -213,7 +213,6 @@ resource "confluent_kafka_acl" "example_kafka_lambda_role_binding_producer" {
     key    = confluent_api_key.example_kafka_lambda_api_key_cluster_admin.id
     secret = confluent_api_key.example_kafka_lambda_api_key_cluster_admin.secret
   }
-
   lifecycle {
     prevent_destroy = false
   }
@@ -250,6 +249,49 @@ resource "confluent_api_key" "example_kafka_lambda_api_key_consumer" {
   }
 }
 
+resource "confluent_kafka_acl" "example_kafka_lambda_acl_consumer" {
+ kafka_cluster {
+    id = confluent_kafka_cluster.example_kafka_lambda_cluster.id
+  }
+  rest_endpoint  = confluent_kafka_cluster.example_kafka_lambda_cluster.rest_endpoint
+  resource_type = "TOPIC"
+  resource_name = confluent_kafka_topic.example_kafka_lambda_topic_test.topic_name
+  pattern_type  = "LITERAL"
+  principal     = "User:${confluent_service_account.example_kafka_lambda_sa_consumer.id}"
+  host          = "*"
+  operation     = "READ"
+  permission    = "ALLOW"
+  credentials {
+    key    = confluent_api_key.example_kafka_lambda_api_key_cluster_admin.id
+    secret = confluent_api_key.example_kafka_lambda_api_key_cluster_admin.secret
+  }
+  lifecycle {
+    prevent_destroy = false
+  }
+}
+
+resource "confluent_kafka_acl" "example_kafka_lambda_acl_consumer_group" {
+ kafka_cluster {
+    id = confluent_kafka_cluster.example_kafka_lambda_cluster.id
+  }
+  rest_endpoint  = confluent_kafka_cluster.example_kafka_lambda_cluster.rest_endpoint
+  resource_type = "GROUP"
+  resource_name = "consumer"
+  pattern_type  = "LITERAL"
+  principal     = "User:${confluent_service_account.example_kafka_lambda_sa_consumer.id}"
+  host          = "*"
+  operation     = "READ"
+  permission    = "ALLOW"
+  credentials {
+    key    = confluent_api_key.example_kafka_lambda_api_key_cluster_admin.id
+    secret = confluent_api_key.example_kafka_lambda_api_key_cluster_admin.secret
+  }
+  lifecycle {
+    prevent_destroy = false
+  }
+}
+
+
 # For role bindings such as DeveloperRead and DeveloperWrite at least a standard cluster type would be required. Let's use ACLs instead
 # resource "confluent_role_binding" "example_kafka_lambda_role_binding_consumer" {
 #   principal   = "User:${confluent_service_account.example_kafka_lambda_sa_consumer.id}"
@@ -279,4 +321,22 @@ output "cluster_api_key_producer" {
 
 output "cluster_api_key_consumer" {
     value = nonsensitive("Key: ${confluent_api_key.example_kafka_lambda_api_key_consumer.id}\nSecret: ${confluent_api_key.example_kafka_lambda_api_key_consumer.secret}")
+}
+
+# Generate console client configuration files for testing
+resource "local_sensitive_file" "client_config_files" {
+  for_each = {
+    "admin" = confluent_api_key.example_kafka_lambda_api_key_cluster_admin,
+    "producer" = confluent_api_key.example_kafka_lambda_api_key_producer,
+    "consumer" = confluent_api_key.example_kafka_lambda_api_key_consumer}
+
+  content = templatefile("${path.module}/templates/client.conf.tpl",
+  {
+    client_name = "${each.key}"
+    cluster_bootstrap_server = trimprefix("${confluent_kafka_cluster.example_kafka_lambda_cluster.bootstrap_endpoint}", "SASL_SSL://")
+    api_key = "${each.value.id}"
+    api_secret = "${each.value.secret}"
+  }
+  )
+  filename = "${path.module}/generated/client-configs/client-${each.key}.conf"
 }

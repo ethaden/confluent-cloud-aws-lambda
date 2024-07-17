@@ -4,12 +4,29 @@
 package io.confluent.example.aws.lambda;
 
 import java.util.Map;
+import java.util.List;
+import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import com.amazonaws.services.lambda.runtime.events.KafkaEvent;
+import com.amazonaws.services.lambda.runtime.events.KafkaEvent.KafkaEventRecord;
+import com.google.gson.Gson;
 
 class AppTest {
-    @Test void appHandlesRequest() {
-        App classUnderTest = new App();
-        assertNull(classUnderTest.handleRequest(Map.of("key", "value"), null), "app should have a request handler");
+    // @Test void appHandlesRequest() {
+    //     App classUnderTest = new App();
+    //     assertNull(classUnderTest.handleRequest(Map.of("key", "value"), null), "app should have a request handler");
+    // }
+    @Test void appDeserializes() {
+        Address address = new Address("Street", "City", "12345", "N/A", "Germany", "N/A", false);
+        Customer customer = new Customer("Mustermann", "Max", List.of(address));
+        Gson gson = new Gson();
+        String json = gson.toJson(customer);
+        App app = new App();
+        KafkaEventRecord record = new KafkaEventRecord();
+        record.setValue(json);
+        KafkaEvent event = new KafkaEvent();
+        event.setRecords(Map.of("1", Arrays.asList(record)));
+        app.handleRequest(event, null);
     }
 }

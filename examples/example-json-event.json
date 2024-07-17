@@ -1,0 +1,26 @@
+{
+    "id": "2f792f79-c3a4-42a2-8cc6-fb47b83cc157",
+    "saluation": "Mr",
+    "lastName": "Doe",
+    "givenName": "John",
+    "addresses": [
+        {
+            "street": "899 W Evelyn Ave",
+            "city": "Mountain View",
+            "zipCode": "94041",
+            "state": "CA",
+            "country": "US",
+            "extraInfo": "N/A",
+            "isPrimary": true
+        },
+        {
+            "street": "6801 Hollywood Blvd",
+            "city": "Hollywood",
+            "zipCode": "90028",
+            "state": "CA",
+            "country": "US",
+            "extraInfo": "N/A",
+            "isPrimary": false
+        }
+    ]
+}

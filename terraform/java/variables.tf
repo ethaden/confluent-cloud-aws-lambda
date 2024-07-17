@@ -72,3 +72,9 @@ variable "ccloud_cluster_region" {
     default = "us-east-2"
     description = "The region used to deploy the Confluent Cloud Kafka cluster"
 }
+
+variable "ccloud_cluster_topic" {
+    type = string
+    default = "test"
+    description = "The name of the Kafka topic to create and to subscribe to"
+}

@@ -24,26 +24,15 @@ public class App implements RequestHandler<KafkaEvent, Void> {
         if (context != null) {
             LambdaLogger logger = context.getLogger();
             //logger.log("EVENT TYPE: " + event.getClass());
-            logger.log("EVENT: " + event.toString());
+            //logger.log("EVENT: " + event.toString());
             event.getRecords().forEach((k, v) -> {
                 v.forEach((record) -> {
-                    //logger.log(k+" IS "+v.getValue().toString());
-                    logger.log(record.getValue());
+                    //logger.log(record.getValue());
                     Customer customer = gson.fromJson(new String(base64Decoder.decode(record.getValue())), Customer.class);
                     logger.log("Customer: "+customer.toString());
                 });
             });
-            logger.log(event.toString());
-            // event.forEach((k, v) -> {
-            //     logger.log("key TYPE: " + k.getClass() + ". Value TYPE: "+v.getClass());
-            //     logger.log("key="+k.toString()+". value="+v.toString());
-            // });
-            // Gson gson = new Gson();
-            // event.forEach((k, v) -> {
-            //     //AWSLambdaKafkaRecordBatch recordBatch = gson.fromJson((String)v, AWSLambdaKafkaRecordBatch.class);
-            //     //logger.log(recordBatch.toString());
-            //     logger.log(v.toString());
-            // });
+            //logger.log(event.toString());
         } else {
             event.getRecords().forEach((k, v) -> {
                 v.forEach((record) -> {

@@ -59,6 +59,21 @@ If you agree with the plan, deploy the resources (that will take some time):
 terraform apply
 ```
 
+== Testing the setup
+
+In your browser, go to the AWS Lambda overview. You should see your newly created Lambda. In the `monitor` section you find a link to CloudWatch.
+
+You can now produce sample data with the Kafka console producer. Just go to subfolder `terraform/java/generated/client-configs` and run console producer (you can find the whole command line in `client-producer.conf` if you haven't disabled this feature in the variables):
+
+```shell
+kafka-console-producer --producer.config client-producer.conf --bootstrap-server <bootstrap-server-with-port> --topic test
+```
+
+You can now paste the content of `examples/example-json-event.json` as a single line to the producer. Of course, you can customize the data.
+
+After a while, you should see a entry in Cloud Watch.
+
+
 == Wrapping things up
 
 You can destroy all created resources including the cluster in Confluent Cloud by running the following command:

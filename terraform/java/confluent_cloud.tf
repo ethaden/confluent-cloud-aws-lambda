@@ -310,6 +310,7 @@ resource "local_sensitive_file" "client_config_files" {
     cluster_bootstrap_server = trimprefix("${confluent_kafka_cluster.example_kafka_lambda_cluster.bootstrap_endpoint}", "SASL_SSL://")
     api_key = "${each.value.id}"
     api_secret = "${each.value.secret}"
+    topic = var.ccloud_cluster_topic
   }
   )
   filename = "${path.module}/generated/client-configs/client-${each.key}.conf"

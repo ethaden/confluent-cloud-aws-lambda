@@ -1,7 +1,7 @@
 # Produce with this command:
-# kafka-console-producer --producer.config client-${client_name}.conf --bootstrap-server ${cluster_bootstrap_server} --topic test
+# kafka-console-producer --producer.config client-${client_name}.conf --bootstrap-server ${cluster_bootstrap_server} --topic ${topic}
 # Consume with this command:
-# kafka-console-consumer --consumer.config client-${client_name}.conf --bootstrap-server ${cluster_bootstrap_server} --topic test --from-beginning
+# kafka-console-consumer --consumer.config client-${client_name}.conf --bootstrap-server ${cluster_bootstrap_server} --topic ${topic} --from-beginning
 
 bootstrap.servers=${cluster_bootstrap_server}
 security.protocol=SASL_SSL

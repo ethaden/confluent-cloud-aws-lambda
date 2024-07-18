@@ -128,6 +128,6 @@ variable "ccloud_cluster_generate_client_config_files" {
 
 variable "aws_lambda_function_name" {
     type = string
-    default = "example_kafka_lambda"
-    description = "The name of the lambda function"
+    default = "example-kafka-lambda"
+    description = "The name of the lambda function. Please use only alphanumeric characters and hyphens (due to a limitation of S3 naming conventions)"
 }

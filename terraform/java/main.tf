@@ -6,10 +6,10 @@
 # as the S3 APIs are way more efficient in handling large files
 # We follow the recommendation.
 resource "aws_s3_bucket" "aws_s3_example_kafka_lambda_bucket" {
-  bucket = "${local.resource_prefix}_${var.aws_lambda_function_name}"
+  bucket = "${local.resource_prefix}-${var.aws_lambda_function_name}"
 
   tags = {
-    Name        = "${local.resource_prefix}_${var.aws_lambda_function_name}"
+    Name        = "${local.resource_prefix}-${var.aws_lambda_function_name}"
     Environment = "Common"
   }
   lifecycle {
@@ -102,14 +102,14 @@ data "aws_iam_policy_document" "get_kafka_secret_from_secret_manager_policy_docu
 
 # This resource renders the policy data as json and actually grants the access permissions.
 resource "aws_iam_policy" "get_kafka_secret_from_secret_manager_policy" {
-    name = "${local.resource_prefix}_${var.aws_lambda_function_name}_get_kafka_secret_from_secret_manager_policy"
+    name = "${local.resource_prefix}-${var.aws_lambda_function_name}_get_kafka_secret_from_secret_manager_policy"
 
     policy = data.aws_iam_policy_document.get_kafka_secret_from_secret_manager_policy_document.json
 }
 
 # Here, we combine the assume role and all additional policies in one iam role
 resource "aws_iam_role" "example_kafka_lambda_iam" {
-  name               = "${local.resource_prefix}_${var.aws_lambda_function_name}_iam"
+  name               = "${local.resource_prefix}-${var.aws_lambda_function_name}_iam"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
   managed_policy_arns = [
     aws_iam_policy.write_to_cloudwatch_policy.arn,
@@ -163,7 +163,7 @@ resource "aws_lambda_event_source_mapping" "example_kafka_lambda_trigger" {
 
 # Create a secret in the AWS Secret Manager
 resource "aws_secretsmanager_secret" "example_kafka_lambda_secret_consumer" {
-  name = "${local.resource_prefix}_${var.aws_lambda_function_name}_secret"
+  name = "${local.resource_prefix}-${var.aws_lambda_function_name}_secret"
 }
 
 # Store the generated Kafka API key for the consumer in AWS secret manager

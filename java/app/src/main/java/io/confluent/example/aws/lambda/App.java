@@ -13,6 +13,11 @@ import com.google.gson.Gson;
 
 public class App implements RequestHandler<KafkaEvent, Void> {
 
+    Gson gson = new Gson();
+    public App() {
+
+    }
+
     @Override
     public Void handleRequest(KafkaEvent event, Context context) {
         Decoder base64Decoder = Base64.getDecoder();
@@ -24,7 +29,6 @@ public class App implements RequestHandler<KafkaEvent, Void> {
                 v.forEach((record) -> {
                     //logger.log(k+" IS "+v.getValue().toString());
                     logger.log(record.getValue());
-                    Gson gson = new Gson();
                     Customer customer = gson.fromJson(new String(base64Decoder.decode(record.getValue())), Customer.class);
                     logger.log("Customer: "+customer.toString());
                 });
@@ -45,7 +49,6 @@ public class App implements RequestHandler<KafkaEvent, Void> {
                 v.forEach((record) -> {
                     //logger.log(k+" IS "+v.getValue().toString());
                     System.out.println(record.getValue());
-                    Gson gson = new Gson();
                     Customer customer = gson.fromJson(record.getValue(), Customer.class);
                     System.out.println("Customer: "+customer.toString());
                 });

@@ -120,6 +120,12 @@ variable "ccloud_cluster_topic" {
     description = "The name of the Kafka topic to create and to subscribe to"
 }
 
+variable "ccloud_cluster_consumer_group_prefix" {
+    type = string
+    default = "consumer"
+    description = "The name of the Kafka consumer group prefix to grant access to the Kafka consumer"
+}
+
 variable "ccloud_cluster_generate_client_config_files" {
     type = bool
     default = false

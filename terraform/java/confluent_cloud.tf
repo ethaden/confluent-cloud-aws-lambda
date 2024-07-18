@@ -215,6 +215,16 @@ resource "confluent_role_binding" "example_kafka_lambda_role_binding_consumer" {
     prevent_destroy = false
   }
 }
+resource "confluent_role_binding" "example_kafka_lambda_role_binding_consumer_group" {
+  # Instaniciate this block only if the cluster type is NOT basic
+  count = var.ccloud_cluster_type=="basic" ? 0 : 1
+  principal   = "User:${confluent_service_account.example_kafka_lambda_sa_consumer.id}"
+  role_name   = "DeveloperRead"
+  crn_pattern = "${confluent_kafka_cluster.example_kafka_lambda_cluster.rbac_crn}/kafka=${confluent_kafka_cluster.example_kafka_lambda_cluster.id}/group=${var.ccloud_cluster_consumer_group_prefix}*"
+  lifecycle {
+    prevent_destroy = false
+  }
+}
 
 resource "confluent_kafka_acl" "example_kafka_lambda_acl_consumer" {
   # Instaniciate this block only if the cluster type IS basic
@@ -249,7 +259,7 @@ resource "confluent_kafka_acl" "example_kafka_lambda_acl_consumer_group" {
   }
   rest_endpoint  = confluent_kafka_cluster.example_kafka_lambda_cluster.rest_endpoint
   resource_type = "GROUP"
-  resource_name = "consumer"
+  resource_name = var.ccloud_cluster_consumer_group_prefix
   pattern_type  = "PREFIXED"
   principal     = "User:${confluent_service_account.example_kafka_lambda_sa_consumer.id}"
   host          = "*"
